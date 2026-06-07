@@ -1,8 +1,5 @@
 package com.hridaya.backend.auth.conroller;
-import com.hridaya.backend.auth.dto.LoginRequest;
-import com.hridaya.backend.auth.dto.LoginResponse;
-import com.hridaya.backend.auth.dto.RegisterRequest;
-import com.hridaya.backend.auth.dto.RegisterResponse;
+import com.hridaya.backend.auth.dto.*;
 import com.hridaya.backend.auth.entity.User;
 import com.hridaya.backend.auth.service.AuthService;
 import com.hridaya.backend.common.dto.ApiResponse;
@@ -42,6 +39,38 @@ public class AuthController {
                 response
         );
 
+    }
+
+
+    @PostMapping("/send-otp")
+    public ApiResponse<Object> sendOtp(
+            @RequestBody SendOtpRequest request
+    ) {
+
+        authService.sendOtp(
+                request.getPhone()
+        );
+
+        return new ApiResponse<>(
+                200,
+                "OTP sent successfully",
+                null
+        );
+    }
+
+    @PostMapping("/verify-otp")
+    public ApiResponse<OtpLoginResponse> verifyOtp(
+            @RequestBody VerifyOtpRequest request
+    ) {
+
+        OtpLoginResponse response =
+                authService.verifyOtp(request);
+
+        return new ApiResponse<>(
+                200,
+                "OTP verified successfully",
+                response
+        );
     }
 
 

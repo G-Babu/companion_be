@@ -1,9 +1,6 @@
 package com.hridaya.backend.auth.service;
 
-import com.hridaya.backend.auth.dto.LoginRequest;
-import com.hridaya.backend.auth.dto.LoginResponse;
-import com.hridaya.backend.auth.dto.RegisterRequest;
-import com.hridaya.backend.auth.dto.RegisterResponse;
+import com.hridaya.backend.auth.dto.*;
 import com.hridaya.backend.auth.entity.User;
 import com.hridaya.backend.auth.repository.UserRepository;
 import com.hridaya.backend.auth.security.JwtService;
@@ -32,6 +29,7 @@ public class AuthService {
         user.setPhone(request.getPhone());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setName(request.getName());
+        user.setProfileCompleted(false);
          User savedUser = userRepository.save(user);
 
         return new RegisterResponse(
@@ -69,4 +67,59 @@ public class AuthService {
         );
 
     }
+
+
+
+    public void sendOtp(String phone) {
+
+        System.out.println(
+                "OTP for " + phone + " is 123456"
+        );
+    }
+
+    public OtpLoginResponse verifyOtp(
+            VerifyOtpRequest request
+    ) {
+
+        if (!"123456".equals(request.getOtp())) {
+            throw new RuntimeException("Invalid OTP");
+        }
+
+        User user = userRepository
+                .findByPhone(request.getPhone())
+                .orElse(null);
+
+        boolean isNewUser = false;
+
+        if (user == null) {
+
+            user = new User();
+
+            user.setPhone(
+                    request.getPhone()
+            );
+
+            user.setName(
+                    "New User"
+            );
+
+            user.setPassword(
+                    ""
+            );
+            user.setProfileCompleted(false);
+            user = userRepository.save(user);
+            isNewUser = true;
+        }
+
+        String token = jwtService.generateToken(user.getId());
+
+        return new OtpLoginResponse(
+                user.getId(),
+                user.getPhone(),
+                token,
+                isNewUser
+        );
+    }
+
+
 }
